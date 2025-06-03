@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import appwriteService from "../appwrite/config";
 import { Button, Container } from "../components";
-import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 
 export default function Post() {
@@ -11,7 +10,6 @@ export default function Post() {
     const navigate = useNavigate();
 
     const userData = useSelector((state) => state.auth.userData);
-
     const isAuthor = post && userData ? post.userid === userData.$id : false;
 
     useEffect(() => {
@@ -58,9 +56,9 @@ export default function Post() {
                 <div className="w-full mb-6">
                     <h1 className="text-2xl font-bold">{post.title}</h1>
                 </div>
-                <div className="browser-css">
-                    {parse(post.content)}
-                    </div>
+                <div className="prose max-w-none">
+                    <p className="text-lg text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                </div>
             </Container>
         </div>
     ) : null;

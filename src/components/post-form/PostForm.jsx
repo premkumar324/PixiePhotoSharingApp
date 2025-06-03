@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Input, RTE, Select } from "..";
+import { Button, Input, Select } from "..";
 import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -10,7 +10,7 @@ export default function PostForm({ post }) {
         defaultValues: {
             title: post?.title || "",
             slug: post?.$id || "",
-            content: post?.content || "",
+            caption: post?.content || "",
             status: post?.status || "active",
         },
     });
@@ -19,9 +19,6 @@ export default function PostForm({ post }) {
     const userData = useSelector((state) => state.auth.userData);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    // Debug logging
-    console.log("Current userData:", userData);
 
     const submit = async (data) => {
         try {
@@ -39,8 +36,8 @@ export default function PostForm({ post }) {
                 return;
             }
 
-            if (!data.content?.trim()) {
-                setError("Content is required");
+            if (!data.caption?.trim()) {
+                setError("Caption is required");
                 return;
             }
 
@@ -54,117 +51,89 @@ export default function PostForm({ post }) {
                 return;
             }
 
-            // Debug log
-            console.log("Submitting post with data:", {
-                title: data.title,
-                content: data.content,
-                slug: data.slug,
-                status: data.status,
-                image: data.image?.[0]?.name
-            });
-
-            if (!data.image || !data.image[0]) {
-                setError("Please select a featured image");
-                return;
+            // Create slug from title if not provided
+            if (!data.slug) {
+                data.slug = data.title
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^\w\s-]/g, '')
+                    .replace(/[\s_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
             }
 
-            const uploadedFile = await appwriteService.uploadFile(data.image[0]);
-            if (!uploadedFile) {
-                setError("Failed to upload image. Please try again.");
-                return;
+            let file = null;
+            if (data.image && data.image.length > 0) {
+                const fileToUpload = data.image[0];
+                if (fileToUpload) {
+                    file = await appwriteService.uploadFile(fileToUpload);
+                }
             }
 
-            const postData = {
-                title: data.title.trim(),
-                content: data.content.trim(),
-                status: data.status,
-                slug: data.slug.trim(),
-                featuredimage: uploadedFile.$id,
-                userid: userData.$id
-            };
+            if (post) {
+                if (file) {
+                    appwriteService.deleteFile(post.featuredimage);
+                }
+                
+                const dbPost = await appwriteService.updatePost(post.$id, {
+                    ...data,
+                    content: data.caption,
+                    featuredimage: file ? file.$id : post.featuredimage,
+                });
 
-            // Debug log
-            console.log("Creating post with data:", postData);
-
-            const dbPost = await appwriteService.createPost(postData);
-
-            if (dbPost) {
-                navigate(`/post/${dbPost.$id}`);
+                if (dbPost) {
+                    navigate(`/post/${dbPost.$id}`);
+                }
             } else {
-                await appwriteService.deleteFile(uploadedFile.$id);
-                setError("Failed to create post. Please try again.");
+                const dbPost = await appwriteService.createPost({
+                    ...data,
+                    content: data.caption,
+                    featuredimage: file ? file.$id : undefined,
+                    userid: userData.$id,
+                });
+
+                if (dbPost) {
+                    navigate(`/post/${dbPost.$id}`);
+                }
             }
+
         } catch (error) {
-            console.error("Detailed error in form submission:", error);
-            setError(error.message || "Something went wrong. Please try again.");
+            console.error("PostForm submission error:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const slugTransform = useCallback((value) => {
-        if (value && typeof value === "string")
-            return value
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-zA-Z\d\s]+/g, "-")
-                .replace(/\s/g, "-");
-
-        return "";
-    }, []);
-
-    React.useEffect(() => {
-        const subscription = watch((value, { name }) => {
-            if (name === "title") {
-                setValue("slug", slugTransform(value.title), { shouldValidate: true });
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, [watch, slugTransform, setValue]);
-
     return (
-        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
-            {error && (
-                <div className="w-full mb-4 px-2">
-                    <div className="p-3 rounded-lg bg-red-100 text-red-700 text-sm">
-                        {error}
-                    </div>
-                </div>
-            )}
+        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap gap-4">
             <div className="w-2/3 px-2">
+                <Input
+                    label="Title :"
+                    placeholder="Title"
+                    className="mb-4"
+                    {...register("title", { required: true })}
+                />
+                {errors.title && (
+                    <p className="text-red-600 text-sm mt-1">Title is required</p>
+                )}
+                <Input
+                    label="Slug :"
+                    placeholder="Slug"
+                    className="mb-4"
+                    {...register("slug", { required: true })}
+                />
+                {errors.slug && (
+                    <p className="text-red-600 text-sm mt-1">Slug is required</p>
+                )}
                 <div className="mb-4">
-                    <Input
-                        label="Title :"
-                        placeholder="Title"
-                        {...register("title", { required: true })}
-                    />
-                    {errors.title && (
-                        <p className="text-red-600 text-sm mt-1">Title is required</p>
-                    )}
-                </div>
-                <div className="mb-4">
-                    <Input
-                        label="Slug :"
-                        placeholder="Slug"
-                        {...register("slug", { required: true })}
-                        onInput={(e) => {
-                            setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
-                        }}
-                    />
-                    {errors.slug && (
-                        <p className="text-red-600 text-sm mt-1">Slug is required</p>
-                    )}
-                </div>
-                <div className="mb-4">
-                    <RTE 
-                        label="Content :" 
-                        name="content" 
-                        control={control} 
-                        defaultValue={getValues("content")}
-                    />
-                    {errors.content && (
-                        <p className="text-red-600 text-sm mt-1">Content is required</p>
+                    <label className="inline-block mb-1 pl-1">Caption :</label>
+                    <textarea
+                        className="w-full px-3 py-2 h-36 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Write a caption..."
+                        {...register("caption", { required: true })}
+                    ></textarea>
+                    {errors.caption && (
+                        <p className="text-red-600 text-sm mt-1">Caption is required</p>
                     )}
                 </div>
             </div>
@@ -199,14 +168,10 @@ export default function PostForm({ post }) {
                         <p className="text-red-600 text-sm mt-1">Status is required</p>
                     )}
                 </div>
-                <Button 
-                    type="submit" 
-                    bgColor={post ? "bg-green-500" : undefined} 
-                    className="w-full"
-                    disabled={loading}
-                >
-                    {loading ? "Please wait..." : (post ? "Update" : "Submit")}
+                <Button type="submit" bgColor={post ? "bg-green-500" : "bg-blue-500"} className="w-full">
+                    {post ? "Update" : "Create"}
                 </Button>
+                {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
             </div>
         </form>
     );
