@@ -16,21 +16,23 @@ export class Service{
 
     async getUser(userId) {
         try {
-            if (!userId) {
-                throw new Error("User ID is required");
+            const response = await fetch(`${conf.appwriteUrl}/users/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Appwrite-Project': conf.appwriteProjectId,
+                    'X-Appwrite-Key': import.meta.env.VITE_APPWRITE_API_KEY,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user');
             }
-            // Use the databases service to get user info from a users collection
-            return await this.databases.getDocument(
-                conf.appwriteDatabaseId,
-                'users', // collection ID for users
-                userId
-            );
+
+            const userData = await response.json();
+            return userData;
         } catch (error) {
             console.error("Appwrite service :: getUser :: error", error);
-            return {
-                name: 'Anonymous',
-                email: 'user@example.com'
-            };
+            return null;
         }
     }
 

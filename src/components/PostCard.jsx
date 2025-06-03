@@ -19,6 +19,7 @@ function PostCard({
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
     const [author, setAuthor] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -32,29 +33,41 @@ function PostCard({
     }, []);
 
     useEffect(() => {
-        if (showAuthor && userid) {
-            // Fetch author information
-            appwriteService.getUser(userid)
-                .then(userData => {
-                    if (userData) {
-                        setAuthor(userData)
+        let isMounted = true;
+
+        const loadAuthor = async () => {
+            if (showAuthor && userid) {
+                try {
+                    const user = await appwriteService.getUser(userid);
+                    if (isMounted && user) {
+                        setAuthor(user);
                     }
-                })
-                .catch(error => {
-                    console.error("Error fetching author:", error)
-                })
-        }
-    }, [userid, showAuthor])
+                } catch (error) {
+                    console.error("Error loading author:", error);
+                } finally {
+                    if (isMounted) {
+                        setLoading(false);
+                    }
+                }
+            } else {
+                setLoading(false);
+            }
+        };
+
+        loadAuthor();
+        return () => {
+            isMounted = false;
+        };
+    }, [userid, showAuthor]);
 
     const formatDate = (dateString) => {
         try {
-            // Handle both string timestamps and numeric timestamps
             const date = typeof dateString === 'string' 
                 ? new Date(dateString)
                 : new Date(parseInt(dateString));
 
             if (isNaN(date.getTime())) {
-                return 'Recent'; // Fallback for invalid dates
+                return 'Recent';
             }
 
             return date.toLocaleDateString('en-US', {
@@ -145,25 +158,33 @@ function PostCard({
                 {showAuthor && (
                     <div className='flex items-center mt-4 pt-4 border-t border-gray-100'>
                         <div className='w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm'>
-                            {author ? (
-                                author.name?.charAt(0) || author.email?.charAt(0)
+                            {loading ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : author ? (
+                                author.name?.charAt(0).toUpperCase()
                             ) : (
                                 <FiUser className="w-4 h-4" />
                             )}
                         </div>
                         <div className='ml-2'>
                             <p className='text-sm font-medium text-gray-900'>
-                                {author ? (author.name || 'Anonymous') : 'Loading...'}
+                                {loading ? (
+                                    <span className="inline-block w-24 h-4 bg-gray-200 animate-pulse rounded" />
+                                ) : author ? (
+                                    author.name
+                                ) : (
+                                    'Unknown User'
+                                )}
                             </p>
-                            <p className='text-xs text-gray-500'>
-                                {author ? author.email : ''}
-                            </p>
+                            {!loading && author?.email && (
+                                <p className='text-xs text-gray-500'>{author.email}</p>
+                            )}
                         </div>
                     </div>
                 )}
             </div>
         </div>
-    )
+    );
 }
 
-export default PostCard
+export default PostCard;
