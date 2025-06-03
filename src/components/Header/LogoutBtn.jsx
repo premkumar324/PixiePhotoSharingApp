@@ -1,15 +1,24 @@
 import React from 'react'
 import {useDispatch} from 'react-redux'
+import {useNavigate} from 'react-router-dom'
 import authService from '../../appwrite/auth'
 import {logout} from '../../store/authSlice'
 import { FiLogOut } from 'react-icons/fi'
 
 function LogoutBtn() {
     const dispatch = useDispatch()
-    const logoutHandler = () => {
-        authService.logout().then(() => {
+    const navigate = useNavigate()
+
+    const logoutHandler = async () => {
+        try {
+            await authService.logout()
             dispatch(logout())
-        })
+            navigate('/')
+            // Force a page reload to clear any cached states
+            window.location.reload()
+        } catch (error) {
+            console.error("Logout error:", error)
+        }
     }
     
     return (

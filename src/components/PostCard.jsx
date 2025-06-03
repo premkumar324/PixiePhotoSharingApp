@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import appwriteService from "../appwrite/config"
 import {Link, useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { FiMoreVertical, FiEdit2, FiTrash2, FiCalendar } from 'react-icons/fi'
+import { FiMoreVertical, FiEdit2, FiTrash2, FiCalendar, FiUser } from 'react-icons/fi'
 
 function PostCard({
     $id, 
@@ -10,13 +10,15 @@ function PostCard({
     featuredimage, 
     content,
     createdAt,
-    userid
+    userid,
+    showAuthor = false
 }) {
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
     const isAuthor = userData && userData.$id === userid;
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
+    const [author, setAuthor] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -28,6 +30,21 @@ function PostCard({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (showAuthor && userid) {
+            // Fetch author information
+            appwriteService.getUser(userid)
+                .then(userData => {
+                    if (userData) {
+                        setAuthor(userData)
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching author:", error)
+                })
+        }
+    }, [userid, showAuthor])
 
     const formatDate = (dateString) => {
         try {
@@ -66,8 +83,8 @@ function PostCard({
     };
     
     return (
-        <div className='group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100'>
-            <div className='relative'>
+        <div className='group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col'>
+            <div className='relative flex-shrink-0'>
                 {isAuthor && (
                     <div className='absolute top-3 right-3 z-10' ref={menuRef}>
                         <button 
@@ -102,24 +119,48 @@ function PostCard({
                             src={appwriteService.getFilePreview(featuredimage)} 
                             alt={title}
                             className='w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300'
+                            loading="lazy"
                         />
                     </div>
-                    <div className='p-6'>
-                        <div className='flex items-center text-sm text-gray-500 mb-3'>
-                            <FiCalendar className='w-4 h-4 mr-1.5' />
-                            <span>{formatDate(createdAt)}</span>
+                </Link>
+            </div>
+            <div className='flex flex-col flex-grow p-4 sm:p-5'>
+                <Link to={`/post/${$id}`} className="flex-grow">
+                    <div className='flex items-center text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3'>
+                        <FiCalendar className='w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5' />
+                        <span>{formatDate(createdAt)}</span>
+                    </div>
+                    <h2 className='text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-gray-800 line-clamp-2 group-hover:text-purple-600 transition-colors'>{title}</h2>
+                    <p className='text-sm sm:text-base text-gray-600 leading-relaxed line-clamp-3 mb-4'>{content}</p>
+                </Link>
+                <div className='mt-auto'>
+                    <div className='inline-flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-700'>
+                        Read More
+                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.75 6.75L19.25 12L13.75 17.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M19 12H4.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                {showAuthor && (
+                    <div className='flex items-center mt-4 pt-4 border-t border-gray-100'>
+                        <div className='w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm'>
+                            {author ? (
+                                author.name?.charAt(0) || author.email?.charAt(0)
+                            ) : (
+                                <FiUser className="w-4 h-4" />
+                            )}
                         </div>
-                        <h2 className='text-xl font-semibold mb-3 text-gray-800 line-clamp-2 group-hover:text-purple-600 transition-colors'>{title}</h2>
-                        <p className='text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4'>{content}</p>
-                        <div className='inline-flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-700'>
-                            Read More
-                            <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M13.75 6.75L19.25 12L13.75 17.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M19 12H4.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                        <div className='ml-2'>
+                            <p className='text-sm font-medium text-gray-900'>
+                                {author ? (author.name || 'Anonymous') : 'Loading...'}
+                            </p>
+                            <p className='text-xs text-gray-500'>
+                                {author ? author.email : ''}
+                            </p>
                         </div>
                     </div>
-                </Link>
+                )}
             </div>
         </div>
     )

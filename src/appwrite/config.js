@@ -14,6 +14,26 @@ export class Service{
         this.bucket = new Storage(this.client);
     }
 
+    async getUser(userId) {
+        try {
+            if (!userId) {
+                throw new Error("User ID is required");
+            }
+            // Use the databases service to get user info from a users collection
+            return await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                'users', // collection ID for users
+                userId
+            );
+        } catch (error) {
+            console.error("Appwrite service :: getUser :: error", error);
+            return {
+                name: 'Anonymous',
+                email: 'user@example.com'
+            };
+        }
+    }
+
     async createPost({title, slug, content, featuredimage, status, userid}){
         try {
             if (!title || !slug || !content || !featuredimage || !status || !userid) {
