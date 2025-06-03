@@ -131,8 +131,8 @@ function Home() {
                         <p className="text-gray-600 text-sm mt-1">Discover amazing posts from our community</p>
                     </div>
 
-                    {/* Grid Layout */}
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                    {/* Feed Layout */}
+                    <div className="max-w-2xl mx-auto space-y-6">
                         {posts.map((post) => (
                             <ExploreGrid
                                 key={post.$id}
