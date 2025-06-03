@@ -130,27 +130,27 @@ export default function PostForm({ post }) {
     };
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit(submit)} className="bg-white rounded-xl shadow-md p-6">
+        <div className="w-full px-4 sm:px-0 sm:max-w-2xl mx-auto">
+            <form onSubmit={handleSubmit(submit)} className="bg-white rounded-xl shadow-md p-4 sm:p-6">
                 {error && (
-                    <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                    <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm sm:text-base">
                         <p>{error}</p>
                     </div>
                 )}
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                     <div>
                         <div className="flex justify-between items-center mb-2">
-                            <label className="block text-gray-700 font-medium">
+                            <label className="block text-gray-700 font-medium text-sm sm:text-base">
                                 Title <span className="text-red-500">*</span>
                             </label>
-                            <span className={`text-sm ${charCount.title > 50 ? 'text-red-500' : 'text-gray-500'}`}>
+                            <span className={`text-xs sm:text-sm ${charCount.title > 50 ? 'text-red-500' : 'text-gray-500'}`}>
                                 {charCount.title}/50
                             </span>
                         </div>
                         <Input
                             placeholder="Give your post a title"
-                            className="w-full text-xl"
+                            className="w-full text-lg sm:text-xl"
                             {...register("title", { 
                                 required: true,
                                 maxLength: 50,
@@ -158,24 +158,24 @@ export default function PostForm({ post }) {
                             })}
                         />
                         {errors.title?.type === 'required' && (
-                            <p className="mt-1 text-red-500">Title is required</p>
+                            <p className="mt-1 text-red-500 text-xs sm:text-sm">Title is required</p>
                         )}
                         {errors.title?.type === 'maxLength' && (
-                            <p className="mt-1 text-red-500">Title must be less than 50 characters</p>
+                            <p className="mt-1 text-red-500 text-xs sm:text-sm">Title must be less than 50 characters</p>
                         )}
                     </div>
 
                     <div>
                         <div className="flex justify-between items-center mb-2">
-                            <label className="block text-gray-700 font-medium">
+                            <label className="block text-gray-700 font-medium text-sm sm:text-base">
                                 Caption <span className="text-red-500">*</span>
                             </label>
-                            <span className={`text-sm ${charCount.caption > 200 ? 'text-red-500' : 'text-gray-500'}`}>
+                            <span className={`text-xs sm:text-sm ${charCount.caption > 200 ? 'text-red-500' : 'text-gray-500'}`}>
                                 {charCount.caption}/200
                             </span>
                         </div>
                         <textarea
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none h-20"
+                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none h-24 sm:h-32 text-sm sm:text-base"
                             placeholder="Add a short caption to your post..."
                             {...register("caption", { 
                                 required: true,
@@ -184,22 +184,22 @@ export default function PostForm({ post }) {
                             })}
                         ></textarea>
                         {errors.caption?.type === 'required' && (
-                            <p className="mt-1 text-red-500">Caption is required</p>
+                            <p className="mt-1 text-red-500 text-xs sm:text-sm">Caption is required</p>
                         )}
                         {errors.caption?.type === 'maxLength' && (
-                            <p className="mt-1 text-red-500">Caption must be less than 200 characters</p>
+                            <p className="mt-1 text-red-500 text-xs sm:text-sm">Caption must be less than 200 characters</p>
                         )}
                     </div>
 
                     <div>
-                        <label className="block text-gray-700 font-medium mb-2">
+                        <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                             Upload Image <span className="text-red-500">*</span>
                         </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 transition-colors">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 hover:border-blue-500 transition-colors">
                             <Input
                                 type="file"
                                 accept="image/png, image/jpg, image/jpeg, image/gif"
-                                className="w-full"
+                                className="w-full text-sm sm:text-base"
                                 {...register("image", { 
                                     required: !post,
                                     onChange: handleImageChange
@@ -207,12 +207,12 @@ export default function PostForm({ post }) {
                             />
                         </div>
                         {errors.image && (
-                            <p className="mt-1 text-red-500">Image is required</p>
+                            <p className="mt-1 text-red-500 text-xs sm:text-sm">Image is required</p>
                         )}
                         
                         {imagePreview && !showCropper && (
                             <div className="mt-4">
-                                <div className="relative aspect-[4/3] w-full max-w-md rounded-lg overflow-hidden">
+                                <div className="relative aspect-[4/3] w-full max-w-md mx-auto rounded-lg overflow-hidden">
                                     <img
                                         src={imagePreview}
                                         alt="Preview"
@@ -223,11 +223,11 @@ export default function PostForm({ post }) {
                         )}
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-2 sm:pt-4">
                         <Button
                             type="submit"
                             bgColor={post ? "bg-green-500" : "bg-blue-500"}
-                            className="min-w-[150px]"
+                            className="w-full sm:w-auto min-w-[150px]"
                             disabled={loading || charCount.title > 50 || charCount.caption > 200}
                         >
                             {loading ? "Posting..." : (post ? "Update Post" : "Post")}
@@ -237,11 +237,15 @@ export default function PostForm({ post }) {
             </form>
 
             {showCropper && imagePreview && (
-                <ImageCropper
-                    imageUrl={imagePreview}
-                    onCropComplete={handleCropComplete}
-                    onCancel={handleCropCancel}
-                />
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+                    <div className="w-full max-w-lg bg-white rounded-xl overflow-hidden">
+                        <ImageCropper
+                            imageUrl={imagePreview}
+                            onCropComplete={handleCropComplete}
+                            onCancel={handleCropCancel}
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );
