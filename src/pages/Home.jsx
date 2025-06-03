@@ -74,8 +74,8 @@ function Home() {
                         <div className="animate-pulse space-y-4">
                             <div className="h-8 w-48 bg-gray-200 rounded"></div>
                             <div className="h-4 w-64 bg-gray-100 rounded"></div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-2">
-                                {[...Array(8)].map((_, i) => (
+                            <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                                {[...Array(9)].map((_, i) => (
                                     <div key={i} className="aspect-square bg-gray-100 rounded"></div>
                                 ))}
                             </div>
@@ -132,7 +132,7 @@ function Home() {
                     </div>
 
                     {/* Grid Layout */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 sm:gap-2">
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2">
                         {posts.map((post) => (
                             <ExploreGrid
                                 key={post.$id}
