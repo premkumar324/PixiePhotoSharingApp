@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Input } from "..";
+import { Button, Input, ImageCropper } from "..";
 import appwriteService from "../../appwrite/config";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -19,6 +19,9 @@ export default function PostForm({ post }) {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
+    const [showCropper, setShowCropper] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [croppedBlob, setCroppedBlob] = useState(null);
     const [charCount, setCharCount] = useState({
         title: post?.title?.length || 0,
         caption: post?.content?.length || 0
@@ -34,14 +37,36 @@ export default function PostForm({ post }) {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
+                setShowCropper(true);
             };
             reader.readAsDataURL(file);
         } else {
             setImagePreview(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
+            setSelectedFile(null);
+            setCroppedBlob(null);
         }
+    };
+
+    const handleCropComplete = (blob) => {
+        setCroppedBlob(blob);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(blob);
+        setShowCropper(false);
+    };
+
+    const handleCropCancel = () => {
+        setShowCropper(false);
+        setImagePreview(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
+        setSelectedFile(null);
+        setCroppedBlob(null);
+        setValue('image', '');
     };
 
     const submit = async (data) => {
@@ -57,11 +82,13 @@ export default function PostForm({ post }) {
             const slug = post?.$id || data.title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
             let file = null;
-            if (data.image && data.image.length > 0) {
-                const fileToUpload = data.image[0];
-                if (fileToUpload) {
-                    file = await appwriteService.uploadFile(fileToUpload);
-                }
+            if (croppedBlob) {
+                // Create a File object from the cropped blob
+                const croppedFile = new File([croppedBlob], selectedFile.name, {
+                    type: 'image/jpeg',
+                    lastModified: new Date().getTime()
+                });
+                file = await appwriteService.uploadFile(croppedFile);
             }
 
             if (post) {
@@ -183,9 +210,9 @@ export default function PostForm({ post }) {
                             <p className="mt-1 text-red-500">Image is required</p>
                         )}
                         
-                        {imagePreview && (
+                        {imagePreview && !showCropper && (
                             <div className="mt-4">
-                                <div className="relative w-32 h-32 rounded-lg overflow-hidden">
+                                <div className="relative aspect-[4/3] w-full max-w-md rounded-lg overflow-hidden">
                                     <img
                                         src={imagePreview}
                                         alt="Preview"
@@ -208,6 +235,14 @@ export default function PostForm({ post }) {
                     </div>
                 </div>
             </form>
+
+            {showCropper && imagePreview && (
+                <ImageCropper
+                    imageUrl={imagePreview}
+                    onCropComplete={handleCropComplete}
+                    onCancel={handleCropCancel}
+                />
+            )}
         </div>
     );
 }

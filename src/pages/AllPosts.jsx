@@ -23,9 +23,12 @@ function AllPosts() {
 
     if (loading) {
         return (
-            <div className='w-full py-8'>
+            <div className='w-full py-12'>
                 <Container>
-                    <div className='text-center text-gray-500'>Loading posts...</div>
+                    <div className='flex flex-col items-center'>
+                        <div className='w-24 h-24 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin'></div>
+                        <p className='mt-4 text-gray-600'>Loading stories...</p>
+                    </div>
                 </Container>
             </div>
         )
@@ -33,23 +36,29 @@ function AllPosts() {
 
     if (posts.length === 0) {
         return (
-            <div className='w-full py-8'>
+            <div className='w-full py-12'>
                 <Container>
-                    <div className='text-center text-gray-500'>No posts found</div>
+                    <div className='text-center'>
+                        <h2 className='text-2xl font-semibold text-gray-800 mb-2'>No Stories Yet</h2>
+                        <p className='text-gray-600'>Be the first to share your story with the community.</p>
+                    </div>
                 </Container>
             </div>
         )
     }
 
     return (
-        <div className='w-full py-8'>
+        <div className='w-full py-12'>
             <Container>
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-                    {posts.map((post) => (
-                        <div key={post.$id}>
-                            <PostCard {...post} />
-                        </div>
-                    ))}
+                <div className='max-w-7xl mx-auto'>
+                    <h1 className='text-3xl font-bold text-gray-900 mb-8'>Gallery</h1>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+                        {posts.map((post) => (
+                            <div key={post.$id} className='h-full'>
+                                <PostCard {...post} />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </Container>
         </div>

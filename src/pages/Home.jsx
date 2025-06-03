@@ -26,11 +26,11 @@ function Home() {
   
     if (loading) {
         return (
-            <div className="w-full py-8 mt-4 text-center">
+            <div className="w-full py-12">
                 <Container>
-                    <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-8"></div>
-                        <div className="h-48 bg-gray-200 rounded mb-8"></div>
+                    <div className="flex flex-col items-center">
+                        <div className="w-24 h-24 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin"></div>
+                        <p className="mt-4 text-gray-600">Loading stories...</p>
                     </div>
                 </Container>
             </div>
@@ -85,45 +85,51 @@ function Home() {
             </section>
 
             {/* Recent Posts Section */}
-            <section className="py-16">
+            <section className="py-20 bg-gray-50">
                 <Container>
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-gray-800 mb-4">Featured Stories</h2>
-                        <p className="text-gray-600">Discover inspiring moments shared by our community</p>
-                    </div>
-
-                    {posts.length === 0 ? (
-                        <div className="text-center text-gray-600">
-                            <p className="mb-4">No stories yet. Be the first to share your moment!</p>
-                            {userData && (
-                                <Link 
-                                    to="/add-post"
-                                    className="text-pink-500 hover:text-pink-600 font-medium"
-                                >
-                                    Create a Story
-                                </Link>
-                            )}
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Stories</h2>
+                            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Discover inspiring moments shared by our community</p>
                         </div>
-                    ) : (
-                        <>
-                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-                                {posts.map((post) => (
-                                    <PostCard key={post.$id} {...post} />
-                                ))}
+
+                        {posts.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="max-w-md mx-auto">
+                                    <p className="text-lg text-gray-600 mb-6">No stories yet. Be the first to share your moment!</p>
+                                    {userData && (
+                                        <Link 
+                                            to="/add-post"
+                                            className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            Create Your Story
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
-                            <div className="text-center mt-12">
-                                <Link 
-                                    to="/all-posts"
-                                    className="inline-flex items-center text-pink-500 hover:text-pink-600 font-medium"
-                                >
-                                    View All Stories
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                </Link>
-                            </div>
-                        </>
-                    )}
+                        ) : (
+                            <>
+                                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12'>
+                                    {posts.map((post) => (
+                                        <div key={post.$id} className="h-full">
+                                            <PostCard {...post} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-center">
+                                    <Link 
+                                        to="/all-posts"
+                                        className="inline-flex items-center px-6 py-3 rounded-xl bg-white text-purple-600 font-semibold hover:bg-purple-50 transition-all duration-200 shadow-sm hover:shadow border border-purple-100"
+                                    >
+                                        View All Stories
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </Container>
             </section>
         </div>
