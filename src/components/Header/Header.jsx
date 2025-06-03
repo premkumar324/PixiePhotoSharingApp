@@ -3,7 +3,7 @@ import {Container, Logo, LogoutBtn} from '../index'
 import { Link } from 'react-router-dom'
 import {useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { FiUser, FiEdit, FiGrid, FiHome, FiLogIn, FiUserPlus } from 'react-icons/fi'
+import { FiUser, FiEdit, FiGrid, FiHome, FiLogIn, FiUserPlus, FiImage } from 'react-icons/fi'
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status)
@@ -17,9 +17,9 @@ function Header() {
 
   const navItems = [
     {
-      name: 'Home',
+      name: 'Explore',
       slug: "/",
-      icon: <FiHome className="w-4 h-4" />,
+      icon: <FiGrid className="w-4 h-4" />,
       active: true
     }, 
     {
@@ -35,13 +35,13 @@ function Header() {
       active: !authStatus,
     },
     {
-      name: "All Posts",
+      name: "Gallery",
       slug: "/all-posts",
-      icon: <FiGrid className="w-4 h-4" />,
+      icon: <FiImage className="w-4 h-4" />,
       active: authStatus,
     },
     {
-      name: "Add Post",
+      name: "New Post",
       slug: "/add-post",
       icon: <FiEdit className="w-4 h-4" />,
       active: authStatus,
@@ -55,14 +55,14 @@ function Header() {
           {/* Logo */}
           <div className='flex-shrink-0'>
             <Link to='/' className='flex items-center space-x-3 group'>
-              <div className="w-8 h-8 transition-transform duration-200 group-hover:scale-110">
-                <Logo width='32px' />
+              <div className="w-9 h-9 transition-transform duration-200 group-hover:scale-110">
+                <Logo width='36px' />
               </div>
               <div className="flex flex-col">
-                <span className='text-2xl font-bold text-gray-900 leading-none tracking-tight'>
+                <span className='text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent tracking-tight'>
                   Pixie
                 </span>
-                <span className="text-xs text-gray-500 font-medium">Share your moments</span>
+                <span className="text-xs text-gray-500 font-medium tracking-wide">Capture & Share</span>
               </div>
             </Link>
           </div>
@@ -74,7 +74,7 @@ function Header() {
                 <button
                   key={item.name}
                   onClick={() => navigate(item.slug)}
-                  className='inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
                 >
                   {item.icon}
                   <span className="ml-2">{item.name}</span>
@@ -84,10 +84,10 @@ function Header() {
             {authStatus && (
               <div className="relative ml-2" onMouseLeave={() => setIsDropdownOpen(false)}>
                 <button
-                  className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-gray-200 rounded-lg hover:border-indigo-200 hover:bg-indigo-50 transition-colors"
                   onMouseEnter={() => setIsDropdownOpen(true)}
                 >
-                  <span className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 font-medium mr-2">
+                  <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full text-white font-medium mr-2">
                     {userData?.name?.charAt(0)?.toUpperCase() || <FiUser className="w-4 h-4" />}
                   </span>
                   <span className="text-sm font-medium text-gray-700">
@@ -114,24 +114,24 @@ function Header() {
           <div className='md:hidden flex items-center space-x-1'>
             <button
               onClick={() => navigate('/')}
-              className='p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+              className='p-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
             >
-              <FiHome className="w-5 h-5" />
+              <FiGrid className="w-5 h-5" />
             </button>
             {authStatus ? (
               <>
                 <button
                   onClick={() => navigate('/add-post')}
-                  className='p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='p-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
                 >
                   <FiEdit className="w-5 h-5" />
                 </button>
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className='p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+                    className='p-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
                   >
-                    <span className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full text-blue-600 font-medium">
+                    <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full text-white font-medium">
                       {userData?.name?.charAt(0)?.toUpperCase() || <FiUser className="w-4 h-4" />}
                     </span>
                   </button>
@@ -143,9 +143,9 @@ function Header() {
                       </div>
                       <button
                         onClick={() => navigate('/all-posts')}
-                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600'
                       >
-                        All Posts
+                        Gallery
                       </button>
                       <div className="px-2 py-2">
                         <LogoutBtn />
@@ -158,13 +158,13 @@ function Header() {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className='p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='p-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
                 >
                   <FiLogIn className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
-                  className='p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='p-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
                 >
                   <FiUserPlus className="w-5 h-5" />
                 </button>
