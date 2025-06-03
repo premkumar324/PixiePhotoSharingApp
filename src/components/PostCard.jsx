@@ -29,11 +29,27 @@ function PostCard({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const date = new Date(createdAt).toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+    const formatDate = (dateString) => {
+        try {
+            // Handle both string timestamps and numeric timestamps
+            const date = typeof dateString === 'string' 
+                ? new Date(dateString)
+                : new Date(parseInt(dateString));
+
+            if (isNaN(date.getTime())) {
+                return 'Recent'; // Fallback for invalid dates
+            }
+
+            return date.toLocaleDateString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.error("Date formatting error:", error);
+            return 'Recent';
+        }
+    };
 
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this post?')) {
@@ -91,7 +107,9 @@ function PostCard({
                     <div className='p-4'>
                         <h2 className='text-xl font-semibold mb-2 text-gray-800 line-clamp-2'>{title}</h2>
                         <p className='text-gray-600 line-clamp-3 mb-4'>{content}</p>
-                        <p className='text-sm text-gray-500'>{date}</p>
+                        <div className='flex items-center text-sm text-gray-500'>
+                            <span>{formatDate(createdAt)}</span>
+                        </div>
                     </div>
                 </Link>
             </div>
