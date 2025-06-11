@@ -127,7 +127,7 @@ export class Service{
         }
     }
 
-    async uploadFile(file){
+    async uploadFile(file, progressCallback = null){
         try {
             if (!file) {
                 throw new Error("File is required for upload");
@@ -135,14 +135,25 @@ export class Service{
             
             console.log("Uploading file:", file.name, "Size:", file.size, "Type:", file.type);
             
-            // Upload with permissions that allow the file to be viewed by anyone
-            const result = await this.bucket.createFile(
+            // Create a unique ID for the file
+            const fileId = ID.unique();
+            
+            // Set up the upload with progress tracking
+            const uploadPromise = this.bucket.createFile(
                 conf.appwriteBucketId,
-                ID.unique(),
+                fileId,
                 file,
-                ['read("any")'] // Add read permissions for anyone to ensure the file can be viewed
+                ['read("any")'],
+                // Progress callback
+                progressCallback ? (progress) => {
+                    // Calculate percentage based on chunks
+                    const percentage = (progress.chunksUploaded / progress.chunksTotal) * 100;
+                    progressCallback(percentage);
+                } : undefined
             );
             
+            // Wait for the upload to complete
+            const result = await uploadPromise;
             console.log("File uploaded successfully. File ID:", result.$id);
             return result;
         } catch (error) {

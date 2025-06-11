@@ -30,6 +30,9 @@ export default function PostForm({ post }) {
         caption: post?.content?.length || 0
     });
     const [useOriginalImage, setUseOriginalImage] = useState(false);
+    const [compressImage, setCompressImage] = useState(true);
+    const [compressionQuality, setCompressionQuality] = useState(0.8);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Debug logging
     console.log("PostForm - Auth Status:", authStatus);
@@ -112,10 +115,79 @@ export default function PostForm({ post }) {
         setValue('image', '');
     };
 
+    // Compress image to specified quality
+    const compressImageToJPEG = async (imageFile, quality = 0.8) => {
+        return new Promise((resolve, reject) => {
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(imageFile);
+                reader.onload = (event) => {
+                    try {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
+                                
+                                canvas.toBlob((blob) => {
+                                    if (!blob) {
+                                        console.error("Failed to create blob from canvas");
+                                        // Fallback to the original file
+                                        resolve(imageFile);
+                                        return;
+                                    }
+                                    
+                                    try {
+                                        const compressedFile = new File([blob], imageFile.name.replace(/\.[^/.]+$/, ".jpg"), {
+                                            type: 'image/jpeg',
+                                            lastModified: new Date().getTime()
+                                        });
+                                        resolve(compressedFile);
+                                    } catch (error) {
+                                        console.error("Error creating File from blob:", error);
+                                        // Fallback to the original file
+                                        resolve(imageFile);
+                                    }
+                                }, 'image/jpeg', quality);
+                            } catch (error) {
+                                console.error("Canvas error:", error);
+                                // Fallback to the original file
+                                resolve(imageFile);
+                            }
+                        };
+                        img.onerror = (error) => {
+                            console.error("Image loading error:", error);
+                            // Fallback to the original file
+                            resolve(imageFile);
+                        };
+                    } catch (error) {
+                        console.error("Error processing image:", error);
+                        // Fallback to the original file
+                        resolve(imageFile);
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error("FileReader error:", error);
+                    // Fallback to the original file
+                    resolve(imageFile);
+                };
+            } catch (error) {
+                console.error("Compression error:", error);
+                // Fallback to the original file
+                resolve(imageFile);
+            }
+        });
+    };
+
     const submit = async (data) => {
         try {
             setError("");
             setLoading(true);
+            setUploadProgress(1); // Set initial progress to show indicator immediately
             console.log("PostForm - Submitting post form");
 
             // Double check authentication
@@ -143,16 +215,40 @@ export default function PostForm({ post }) {
 
             let file = null;
             
+            // Show preparing state
+            if (selectedFile) {
+                setUploadProgress(2); // Show a small progress to indicate preparation
+            }
+            
             if (useOriginalImage && selectedFile) {
                 // Upload the original file directly without cropping
-                file = await appwriteService.uploadFile(selectedFile);
+                if (compressImage && selectedFile.type !== 'image/gif') {
+                    // Compress the original image if compression is enabled and not a GIF
+                    setUploadProgress(5); // Show progress for compression phase
+                    const compressedFile = await compressImageToJPEG(selectedFile, compressionQuality);
+                    file = await appwriteService.uploadFile(compressedFile, setUploadProgress);
+                } else {
+                    file = await appwriteService.uploadFile(selectedFile, setUploadProgress);
+                }
             } else if (croppedBlob) {
                 // Create a File object from the cropped blob
-                const croppedFile = new File([croppedBlob], selectedFile.name, {
-                    type: selectedFile.type || 'image/png', // Use PNG for better quality
-                    lastModified: new Date().getTime()
-                });
-                file = await appwriteService.uploadFile(croppedFile);
+                let fileToUpload;
+                if (compressImage && selectedFile.type !== 'image/gif') {
+                    // Convert to JPEG with specified quality
+                    setUploadProgress(5); // Show progress for compression phase
+                    const croppedFile = new File([croppedBlob], selectedFile.name, {
+                        type: 'image/jpeg',
+                        lastModified: new Date().getTime()
+                    });
+                    fileToUpload = await compressImageToJPEG(croppedFile, compressionQuality);
+                } else {
+                    // Use PNG for better quality if compression is disabled
+                    fileToUpload = new File([croppedBlob], selectedFile.name, {
+                        type: selectedFile.type || 'image/png',
+                        lastModified: new Date().getTime()
+                    });
+                }
+                file = await appwriteService.uploadFile(fileToUpload, setUploadProgress);
             }
 
             if (post) {
@@ -188,9 +284,30 @@ export default function PostForm({ post }) {
 
         } catch (error) {
             console.error("PostForm submission error:", error);
-            setError(error.message);
+            let errorMessage = "An error occurred while submitting your post.";
+            
+            if (error.message) {
+                // Check for specific upload-related errors
+                if (error.message.includes("File size exceeds")) {
+                    errorMessage = "File size exceeds the maximum allowed limit. Please choose a smaller file or compress your image.";
+                } else if (error.message.includes("File type not allowed")) {
+                    errorMessage = "This file type is not allowed. Please upload an image (JPG, PNG, GIF, or WebP).";
+                } else if (error.message.includes("network")) {
+                    errorMessage = "Network error occurred during upload. Please check your connection and try again.";
+                } else if (error.message.includes("permission")) {
+                    errorMessage = "You don't have permission to upload files. Please check your account.";
+                } else if (error.message.includes("quota")) {
+                    errorMessage = "Storage quota exceeded. Please delete some files or upgrade your plan.";
+                } else {
+                    // Use the original message for other errors
+                    errorMessage = error.message;
+                }
+            }
+            
+            setError(errorMessage);
         } finally {
             setLoading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -263,7 +380,7 @@ export default function PostForm({ post }) {
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 hover:border-blue-500 transition-colors">
                             <Input
                                 type="file"
-                                accept="image/png, image/jpg, image/jpeg, image/gif"
+                                accept="image/png, image/jpg, image/jpeg, image/gif, image/webp"
                                 className="w-full text-sm sm:text-base"
                                 {...register("image", { 
                                     required: !post,
@@ -275,25 +392,64 @@ export default function PostForm({ post }) {
                             <p className="mt-1 text-red-500 text-xs sm:text-sm">Image is required</p>
                         )}
                         
-                        {selectedFile && selectedFile.size > 1024 * 1024 * 2 && (
-                            <div className="mt-2 flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="useOriginal"
-                                    checked={useOriginalImage}
-                                    onChange={() => {
-                                        const newValue = !useOriginalImage;
-                                        setUseOriginalImage(newValue);
-                                        if (!newValue && selectedFile) {
-                                            // Show cropper if switching to cropped mode
-                                            setShowCropper(true);
-                                        }
-                                    }}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <label htmlFor="useOriginal" className="ml-2 block text-sm text-gray-700">
-                                    Preserve original high-quality image (recommended for large files)
-                                </label>
+                        {selectedFile && (
+                            <div className="mt-2 space-y-2">
+                                {selectedFile.size > 1024 * 1024 * 2 && (
+                                    <div className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id="useOriginal"
+                                            checked={useOriginalImage}
+                                            onChange={() => {
+                                                const newValue = !useOriginalImage;
+                                                setUseOriginalImage(newValue);
+                                                if (!newValue && selectedFile) {
+                                                    // Show cropper if switching to cropped mode
+                                                    setShowCropper(true);
+                                                }
+                                            }}
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        />
+                                        <label htmlFor="useOriginal" className="ml-2 block text-sm text-gray-700">
+                                            Preserve original dimensions (recommended for large files)
+                                        </label>
+                                    </div>
+                                )}
+                                
+                                {selectedFile.type !== 'image/gif' && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id="compressImage"
+                                                checked={compressImage}
+                                                onChange={() => setCompressImage(!compressImage)}
+                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                            />
+                                            <label htmlFor="compressImage" className="ml-2 block text-sm text-gray-700">
+                                                Compress image (convert to JPEG)
+                                            </label>
+                                        </div>
+                                        
+                                        {compressImage && (
+                                            <div className="pl-6">
+                                                <label htmlFor="quality" className="block text-sm text-gray-700 mb-1">
+                                                    Quality: {Math.round(compressionQuality * 100)}%
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    id="quality"
+                                                    min="0.3"
+                                                    max="1"
+                                                    step="0.1"
+                                                    value={compressionQuality}
+                                                    onChange={(e) => setCompressionQuality(parseFloat(e.target.value))}
+                                                    className="w-full max-w-xs"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                         
@@ -309,6 +465,28 @@ export default function PostForm({ post }) {
                             </div>
                         )}
                     </div>
+
+                    {loading && (
+                        <div className="mt-4">
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {uploadProgress < 5 ? 'Preparing...' : 
+                                     uploadProgress < 10 ? 'Compressing image...' : 
+                                     uploadProgress < 100 ? `Uploading: ${Math.round(uploadProgress)}%` : 
+                                     'Processing...'}
+                                </label>
+                                <span className="text-xs text-gray-500">
+                                    {uploadProgress > 0 && uploadProgress < 100 ? `${Math.round(uploadProgress)}%` : ''}
+                                </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div 
+                                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                                    style={{ width: `${Math.max(3, uploadProgress)}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end pt-2 sm:pt-4">
                         <Button
