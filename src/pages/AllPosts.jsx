@@ -13,24 +13,40 @@ function AllPosts() {
     const [selectedPost, setSelectedPost] = useState(null)
     const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
     const userData = useSelector((state) => state.auth.userData)
+    const authStatus = useSelector((state) => state.auth.status)
+    
+    // Debug logging
+    console.log('AllPosts - Auth Status:', authStatus)
+    console.log('AllPosts - User Data:', userData)
 
     useEffect(() => {
         // Fetch posts by the current user
-        if (userData) {
+        if (userData && userData.$id) {
+            console.log('AllPosts - Fetching posts for user:', userData.$id)
             const queries = [Query.equal("userid", userData.$id)]
             
             appwriteService.getPosts(queries)
                 .then((posts) => {
                     if (posts) {
+                        console.log('AllPosts - Posts fetched:', posts.documents.length)
                         setPosts(posts.documents)
+                    } else {
+                        console.log('AllPosts - No posts returned')
+                        setPosts([])
                     }
                 })
                 .catch((error) => {
                     console.error("Error fetching posts:", error)
+                    setPosts([])
                 })
                 .finally(() => {
                     setLoading(false)
                 })
+        } else {
+            // If userData is not available, set loading to false and posts to empty array
+            console.log('AllPosts - No user data available, showing empty gallery')
+            setPosts([])
+            setLoading(false)
         }
     }, [userData])
 

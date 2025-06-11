@@ -11,15 +11,25 @@ function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    console.log('App - Checking current user')
     authService.getCurrentUser()
     .then((userData) => {
       if (userData) {
+        console.log('App - User found, logging in:', userData)
         dispatch(login({userData}))
       } else {
+        console.log('App - No user found, logging out')
         dispatch(logout())
       }
     })
-    .finally(() => setLoading(false))
+    .catch(error => {
+      console.error('App - Error checking current user:', error)
+      dispatch(logout())
+    })
+    .finally(() => {
+      console.log('App - Authentication check complete')
+      setLoading(false)
+    })
   }, [])
   
   return !loading ? (

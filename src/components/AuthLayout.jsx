@@ -6,18 +6,29 @@ export default function Protected({children, authentication = true}) {
     const navigate = useNavigate()
     const [loader, setLoader] = useState(true)
     const authStatus = useSelector(state => state.auth.status)
+    const userData = useSelector(state => state.auth.userData)
+    
+    // Debug logging
+    console.log('AuthLayout - Auth Status:', authStatus)
+    console.log('AuthLayout - User Data:', userData)
+    console.log('AuthLayout - Authentication Required:', authentication)
 
     useEffect(() => {
         // If authentication is required but user is not authenticated
         if (authentication && !authStatus) {
+            console.log('AuthLayout - Redirecting to login')
             navigate("/login")
         } 
         // If authentication is not required but user is authenticated
         else if (!authentication && authStatus) {
+            console.log('AuthLayout - Redirecting to home')
             navigate("/")
         }
-        
-        setLoader(false)
+        // If we're good to show the content
+        else {
+            console.log('AuthLayout - Showing protected content')
+            setLoader(false)
+        }
     }, [authStatus, navigate, authentication])
 
     if (loader) {
