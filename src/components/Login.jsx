@@ -38,19 +38,19 @@ function Login() {
     }
 
     return (
-        <div className='flex items-center justify-center w-full min-h-screen'>
-            <div className={`mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10`}>
+        <div className='flex items-center justify-center w-full min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'>
+            <div className={`mx-auto w-full max-w-lg bg-white/80 backdrop-blur-sm rounded-xl p-10 border border-purple-100 shadow-lg shadow-purple-100/20`}>
                 <div className="mb-2 flex justify-center">
                     <span className="inline-block w-full max-w-[100px]">
                         <Logo width="100%" />
                     </span>
                 </div>
-                <h2 className="text-center text-2xl font-bold leading-tight">Sign in to your account</h2>
-                <p className="mt-2 text-center text-base text-black/60">
+                <h2 className="text-center text-2xl font-bold leading-tight text-indigo-900">Sign in to your account</h2>
+                <p className="mt-2 text-center text-base text-purple-700">
                     Don&apos;t have any account?&nbsp;
                     <Link
                         to="/signup"
-                        className="font-medium text-primary transition-all duration-200 hover:underline"
+                        className="font-medium text-pink-600 transition-all duration-200 hover:underline"
                     >
                         Sign Up
                     </Link>
@@ -98,7 +98,7 @@ function Login() {
                         </div>
                         <Button
                             type="submit"
-                            className="w-full"
+                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                             disabled={loading}
                         >
                             {loading ? "Signing in..." : "Sign in"}

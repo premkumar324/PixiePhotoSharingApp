@@ -7,6 +7,7 @@ import ExploreModal from '../components/ExploreModal'
 import { FiRefreshCw, FiCamera, FiImage, FiTrendingUp, FiUsers, FiChevronDown } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import mountainHero from '../assets/mountain-hero.png'
 
 function Home() {
     const [posts, setPosts] = useState([])
@@ -79,15 +80,15 @@ function Home() {
   
     if (loading) {
         return (
-            <div className="w-full min-h-screen bg-white">
+            <div className="w-full min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
                 <Container>
                     <div className="py-8">
                         <div className="animate-pulse space-y-4">
-                            <div className="h-8 w-48 bg-gray-200 rounded"></div>
-                            <div className="h-4 w-64 bg-gray-100 rounded"></div>
+                            <div className="h-8 w-48 bg-indigo-200 rounded-md"></div>
+                            <div className="h-4 w-64 bg-purple-100 rounded-md"></div>
                             <div className="grid grid-cols-3 gap-1 sm:gap-2">
                                 {[...Array(9)].map((_, i) => (
-                                    <div key={i} className="aspect-square bg-gray-100 rounded"></div>
+                                    <div key={i} className="aspect-square bg-pink-100 rounded-md"></div>
                                 ))}
                             </div>
                         </div>
@@ -99,15 +100,15 @@ function Home() {
 
     if (posts.length === 0) {
         return (
-            <div className="w-full min-h-screen bg-white">
+            <div className="w-full min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
                 <Container>
                     <div className="py-8">
                         <div className="text-center">
-                            <h1 className="text-2xl font-bold text-gray-800 mb-4">No posts yet</h1>
-                            <p className="text-gray-600 mb-8">Be the first to share something amazing!</p>
+                            <h1 className="text-2xl font-bold text-indigo-800 mb-4">No posts yet</h1>
+                            <p className="text-purple-700 mb-8">Be the first to share something amazing!</p>
                             <button
                                 onClick={() => fetchPosts()}
-                                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="inline-flex items-center px-4 py-2 border border-purple-300 rounded-lg text-sm font-medium text-purple-700 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                             >
                                 <FiRefreshCw className="w-4 h-4 mr-2" />
                                 Refresh
@@ -121,43 +122,50 @@ function Home() {
 
     return (
         <div 
-            className="w-full min-h-screen bg-white"
+            className="w-full min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
         >
             {/* Pull to Refresh Indicator */}
             {refreshing && (
-                <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2 bg-gradient-to-b from-gray-100">
-                    <FiRefreshCw className="w-5 h-5 text-gray-600 animate-spin" />
-                    <span className="ml-2 text-sm text-gray-600">Refreshing...</span>
+                <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2 bg-gradient-to-b from-indigo-100">
+                    <FiRefreshCw className="w-5 h-5 text-purple-600 animate-spin" />
+                    <span className="ml-2 text-sm text-purple-600">Refreshing...</span>
                 </div>
             )}
 
-            {/* Compact Hero Section */}
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white relative max-h-[60vh] overflow-hidden">
-                <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+            {/* Hero Section */}
+            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10 z-10"></div>
                 <div className="absolute inset-0 z-0">
-                    {/* Background image would be ideal here */}
-                    <div className="h-full w-full bg-cover bg-center" 
-                         style={{backgroundImage: "url('https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1470&auto=format&fit=crop')", 
-                                opacity: 0.7}}></div>
+                    {/* Mountain hero image background */}
+                    <img 
+                        src={mountainHero} 
+                        alt="Mountain landscape" 
+                        className="h-full w-full object-cover object-center filter blur-sm scale-105 opacity-95 brightness-125 contrast-110 saturate-125"
+                    />
+                    {/* Additional color overlay to match app theme */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15 mix-blend-soft-light"></div>
+                    {/* Add a subtle light glow */}
+                    <div className="absolute inset-0 bg-white/10 mix-blend-overlay"></div>
                 </div>
                 
                 <Container>
-                    <div className="relative z-20 py-10 sm:py-12 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between">
-                        <div className="md:w-1/2 text-center md:text-left mb-6 md:mb-0">
-                            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">
-                                Capture & Share Your World
+                    <div className="relative z-20 py-8 sm:py-10 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between">
+                        <div className="md:w-1/2 text-center md:text-left mb-4 md:mb-0 backdrop-blur-sm bg-black/10 p-4 rounded-xl shadow-lg border border-white/20">
+                            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-2 text-shadow-lg">
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-100 to-white">Capture & Share</span>
+                                <span className="block mt-1 text-white">Your World</span>
                             </h1>
-                            <p className="text-lg opacity-90 max-w-md mx-auto md:mx-0 mb-4">
+                            <p className="text-base sm:text-lg opacity-90 max-w-md mx-auto md:mx-0 mb-4 text-shadow-sm">
                                 Join our community of photographers sharing their best moments
                             </p>
                             
                             {authStatus ? (
                                 <Link 
                                     to="/add-post" 
-                                    className="inline-flex items-center px-5 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                                    className="inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
                                 >
                                     <FiCamera className="mr-2" />
                                     Share Your Moment
@@ -165,7 +173,7 @@ function Home() {
                             ) : (
                                 <Link 
                                     to="/signup" 
-                                    className="inline-flex items-center px-5 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                                    className="inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
                                 >
                                     <FiUsers className="mr-2" />
                                     Join Community
@@ -173,37 +181,37 @@ function Home() {
                             )}
                         </div>
                         
-                        {/* Feature Icons - Now in a column on the right */}
-                        <div className="md:w-1/3 grid grid-cols-3 gap-3">
+                        {/* Feature Icons */}
+                        <div className="md:w-1/3 grid grid-cols-3 gap-2 backdrop-blur-sm bg-black/10 p-3 rounded-xl border border-white/20 shadow-lg">
                             <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-md bg-white bg-opacity-20 mx-auto">
+                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
                                     <FiImage className="h-5 w-5" />
                                 </div>
-                                <p className="mt-1 text-xs font-medium">Beautiful Galleries</p>
+                                <p className="mt-1 text-xs font-medium text-shadow-sm">Beautiful Galleries</p>
                             </div>
                             <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-md bg-white bg-opacity-20 mx-auto">
+                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
                                     <FiUsers className="h-5 w-5" />
                                 </div>
-                                <p className="mt-1 text-xs font-medium">Connect</p>
+                                <p className="mt-1 text-xs font-medium text-shadow-sm">Connect</p>
                             </div>
                             <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-md bg-white bg-opacity-20 mx-auto">
+                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
                                     <FiTrendingUp className="h-5 w-5" />
                                 </div>
-                                <p className="mt-1 text-xs font-medium">Discover</p>
+                                <p className="mt-1 text-xs font-medium text-shadow-sm">Discover</p>
                             </div>
                         </div>
                     </div>
                     
                     {/* Scroll indicator */}
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-3 z-20">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-2 z-20">
                         <button 
                             onClick={scrollToContent}
-                            className="animate-bounce bg-white bg-opacity-20 rounded-full p-1 hover:bg-opacity-30 transition-all focus:outline-none"
+                            className="animate-bounce bg-white/30 rounded-full p-1.5 hover:bg-white/50 transition-all focus:outline-none shadow-lg border border-white/40"
                             aria-label="Scroll to content"
                         >
-                            <FiChevronDown className="h-6 w-6" />
+                            <FiChevronDown className="h-5 w-5" />
                         </button>
                     </div>
                 </Container>
@@ -214,8 +222,8 @@ function Home() {
                     <div className="py-6 sm:py-8">
                         {/* Section Header */}
                         <div className="max-w-2xl mx-auto mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900">Latest Posts</h2>
-                            <p className="text-gray-600 text-sm mt-1">Discover amazing posts from our community</p>
+                            <h2 className="text-2xl font-bold text-indigo-900">Latest Posts</h2>
+                            <p className="text-purple-700 text-sm mt-1">Discover amazing posts from our community</p>
                         </div>
 
                         {/* Feed Layout */}

@@ -33,7 +33,7 @@ export default function Protected({children, authentication = true}) {
 
     if (loader) {
         return (
-            <div className="w-full h-screen flex items-center justify-center">
+            <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
                 <div className="w-24 h-24 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin"></div>
             </div>
         )
