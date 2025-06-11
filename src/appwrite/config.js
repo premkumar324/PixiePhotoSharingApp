@@ -132,11 +132,19 @@ export class Service{
             if (!file) {
                 throw new Error("File is required for upload");
             }
-            return await this.bucket.createFile(
+            
+            console.log("Uploading file:", file.name, "Size:", file.size, "Type:", file.type);
+            
+            // Upload with permissions that allow the file to be viewed by anyone
+            const result = await this.bucket.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
-                file
-            )
+                file,
+                ['read("any")'] // Add read permissions for anyone to ensure the file can be viewed
+            );
+            
+            console.log("File uploaded successfully. File ID:", result.$id);
+            return result;
         } catch (error) {
             console.error("Appwrite service :: uploadFile :: error", error);
             throw error;

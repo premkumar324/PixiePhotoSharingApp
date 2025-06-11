@@ -29,6 +29,7 @@ export default function PostForm({ post }) {
         title: post?.title?.length || 0,
         caption: post?.content?.length || 0
     });
+    const [useOriginalImage, setUseOriginalImage] = useState(false);
 
     // Debug logging
     console.log("PostForm - Auth Status:", authStatus);
@@ -68,16 +69,27 @@ export default function PostForm({ post }) {
         const file = e.target.files[0];
         if (file) {
             setSelectedFile(file);
+            // For large files, suggest preserving original
+            if (file.size > 1024 * 1024 * 2) { // If larger than 2MB
+                setUseOriginalImage(true);
+            } else {
+                setUseOriginalImage(false);
+            }
+            
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
-                setShowCropper(true);
+                // Only show cropper if not using original image
+                if (!useOriginalImage) {
+                    setShowCropper(true);
+                }
             };
             reader.readAsDataURL(file);
         } else {
             setImagePreview(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
             setSelectedFile(null);
             setCroppedBlob(null);
+            setUseOriginalImage(false);
         }
     };
 
@@ -96,6 +108,7 @@ export default function PostForm({ post }) {
         setImagePreview(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
         setSelectedFile(null);
         setCroppedBlob(null);
+        setUseOriginalImage(false);
         setValue('image', '');
     };
 
@@ -129,10 +142,14 @@ export default function PostForm({ post }) {
             }
 
             let file = null;
-            if (croppedBlob) {
+            
+            if (useOriginalImage && selectedFile) {
+                // Upload the original file directly without cropping
+                file = await appwriteService.uploadFile(selectedFile);
+            } else if (croppedBlob) {
                 // Create a File object from the cropped blob
                 const croppedFile = new File([croppedBlob], selectedFile.name, {
-                    type: 'image/jpeg',
+                    type: selectedFile.type || 'image/png', // Use PNG for better quality
                     lastModified: new Date().getTime()
                 });
                 file = await appwriteService.uploadFile(croppedFile);
@@ -256,6 +273,28 @@ export default function PostForm({ post }) {
                         </div>
                         {errors.image && (
                             <p className="mt-1 text-red-500 text-xs sm:text-sm">Image is required</p>
+                        )}
+                        
+                        {selectedFile && selectedFile.size > 1024 * 1024 * 2 && (
+                            <div className="mt-2 flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="useOriginal"
+                                    checked={useOriginalImage}
+                                    onChange={() => {
+                                        const newValue = !useOriginalImage;
+                                        setUseOriginalImage(newValue);
+                                        if (!newValue && selectedFile) {
+                                            // Show cropper if switching to cropped mode
+                                            setShowCropper(true);
+                                        }
+                                    }}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="useOriginal" className="ml-2 block text-sm text-gray-700">
+                                    Preserve original high-quality image (recommended for large files)
+                                </label>
+                            </div>
                         )}
                         
                         {imagePreview && !showCropper && (

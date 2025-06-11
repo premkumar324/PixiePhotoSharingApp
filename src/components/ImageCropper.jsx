@@ -47,28 +47,39 @@ function ImageCropper({
         const scaleX = image.naturalWidth / image.width
         const scaleY = image.naturalHeight / image.height
 
-        canvas.width = completedCrop.width
-        canvas.height = completedCrop.height
+        // Use the original image dimensions to maintain quality
+        const pixelRatio = window.devicePixelRatio || 1
+        const cropWidth = completedCrop.width * scaleX
+        const cropHeight = completedCrop.height * scaleY
+
+        // Create a high-resolution canvas
+        canvas.width = cropWidth * pixelRatio
+        canvas.height = cropHeight * pixelRatio
+        
+        // Scale the context to ensure proper rendering
+        ctx.scale(pixelRatio, pixelRatio)
+        ctx.imageSmoothingQuality = 'high'
 
         ctx.drawImage(
             image,
             completedCrop.x * scaleX,
             completedCrop.y * scaleY,
-            completedCrop.width * scaleX,
-            completedCrop.height * scaleY,
+            cropWidth,
+            cropHeight,
             0,
             0,
-            completedCrop.width,
-            completedCrop.height
+            cropWidth,
+            cropHeight
         )
 
+        // Convert to blob with maximum quality
         canvas.toBlob((blob) => {
             if (!blob) {
                 console.error('Canvas is empty')
                 return
             }
             onCropComplete(blob)
-        }, 'image/jpeg', 0.95)
+        }, 'image/png', 1.0) // Use PNG for lossless quality
     }
 
     return (
