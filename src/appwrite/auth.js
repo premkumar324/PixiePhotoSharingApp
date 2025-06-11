@@ -20,10 +20,19 @@ export class AuthService {
             const userAccount = await this.account.create(ID.unique(), email, password, name);
             if (userAccount) {
                 console.log("AuthService - Account created successfully, logging in");
-                // call another method
-                return this.login({email, password});
+                // Login after account creation
+                const session = await this.login({email, password});
+                if (session) {
+                    console.log("AuthService - Login successful after signup, getting user data");
+                    // Get and return the user data
+                    return await this.getCurrentUser();
+                } else {
+                    console.error("AuthService - Failed to create session after signup");
+                    return null;
+                }
             } else {
-               return userAccount;
+                console.error("AuthService - Failed to create account");
+                return null;
             }
         } catch (error) {
             console.error("Appwrite service :: createAccount :: error", error);

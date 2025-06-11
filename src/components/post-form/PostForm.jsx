@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Input, ImageCropper } from "..";
 import appwriteService from "../../appwrite/config";
+import authService from "../../appwrite/auth";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -16,6 +17,7 @@ export default function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userData);
+    const authStatus = useSelector((state) => state.auth.status);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(post?.featuredimage ? appwriteService.getFilePreview(post.featuredimage) : null);
@@ -26,6 +28,33 @@ export default function PostForm({ post }) {
         title: post?.title?.length || 0,
         caption: post?.content?.length || 0
     });
+
+    // Debug logging
+    console.log("PostForm - Auth Status:", authStatus);
+    console.log("PostForm - User Data:", userData);
+
+    // Check authentication on component mount
+    useEffect(() => {
+        if (!authStatus || !userData) {
+            console.log("PostForm - Not authenticated, checking current user");
+            authService.getCurrentUser()
+                .then(currentUser => {
+                    if (!currentUser) {
+                        console.log("PostForm - No current user found");
+                        setError("Please log in to create a post");
+                    } else {
+                        console.log("PostForm - Current user found:", currentUser.$id);
+                        // Clear any previous error about authentication
+                        if (error === "Please log in to create a post") {
+                            setError("");
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("PostForm - Error checking current user:", err);
+                });
+        }
+    }, [authStatus, userData]);
 
     const handleInputChange = (field, value) => {
         setCharCount(prev => ({
@@ -73,11 +102,19 @@ export default function PostForm({ post }) {
         try {
             setError("");
             setLoading(true);
+            console.log("PostForm - Submitting post form");
 
-            if (!userData || !userData.$id) {
+            // Double check authentication
+            const currentUser = await authService.getCurrentUser();
+            if (!currentUser) {
+                console.error("PostForm - No user found when submitting");
                 setError("Please log in to create a post");
                 return;
             }
+
+            // Use the current user from Appwrite if Redux store doesn't have it
+            const userToUse = userData && userData.$id ? userData : currentUser;
+            console.log("PostForm - Using user:", userToUse.$id);
 
             const slug = post?.$id || data.title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
 
@@ -107,12 +144,13 @@ export default function PostForm({ post }) {
                     navigate(`/post/${dbPost.$id}`);
                 }
             } else {
+                console.log("PostForm - Creating new post with user ID:", userToUse.$id);
                 const dbPost = await appwriteService.createPost({
                     title: data.title,
                     content: data.caption,
                     featuredimage: file ? file.$id : undefined,
                     status: "active",
-                    userid: userData.$id,
+                    userid: userToUse.$id,
                     slug
                 });
 

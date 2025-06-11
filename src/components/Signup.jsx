@@ -9,20 +9,33 @@ import {useForm} from 'react-hook-form'
 function Signup() {
     const navigate = useNavigate()
     const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const {register, handleSubmit} = useForm()
 
     const create = async(data) => {
         setError("")
+        setLoading(true)
         try {
-            const userData = await authService.createAccount(data)
-            if (userData) {
+            console.log("Signup - Creating account with data:", { ...data, password: "***" })
+            const session = await authService.createAccount(data)
+            if (session) {
+                console.log("Signup - Account created successfully, fetching user data")
                 const userData = await authService.getCurrentUser()
-                if(userData) dispatch(login(userData));
-                navigate("/")
+                if (userData) {
+                    console.log("Signup - User data fetched, dispatching login with:", userData)
+                    dispatch(login({userData}))
+                    navigate("/")
+                } else {
+                    console.error("Signup - Failed to get user data after account creation")
+                    setError("Failed to get user data. Please try again.")
+                }
             }
         } catch (error) {
-            setError(error.message)
+            console.error("Signup error:", error)
+            setError(error.message || "Signup failed. Please try again.")
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -74,8 +87,8 @@ function Signup() {
                         {...register("password", {
                             required: true,})}
                         />
-                        <Button type="submit" className="w-full">
-                            Create Account
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? "Creating Account..." : "Create Account"}
                         </Button>
                     </div>
                 </form>
