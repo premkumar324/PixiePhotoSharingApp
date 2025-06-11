@@ -152,54 +152,43 @@ function Home() {
                 </div>
                 
                 <Container>
-                    <div className="relative z-20 py-8 sm:py-10 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between">
-                        <div className="md:w-1/2 text-center md:text-left mb-4 md:mb-0 backdrop-blur-sm bg-black/10 p-4 rounded-xl shadow-lg border border-white/20">
-                            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-2 text-shadow-lg">
+                    <div className="relative z-20 py-8 sm:py-10 px-4 sm:px-6 flex items-center justify-center">
+                        <div className="max-w-lg w-full text-center backdrop-blur-sm bg-black/10 p-5 rounded-xl shadow-lg border border-white/20">
+                            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-shadow-lg">
                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-100 to-white">Capture & Share</span>
                                 <span className="block mt-1 text-white">Your World</span>
                             </h1>
-                            <p className="text-base sm:text-lg opacity-90 max-w-md mx-auto md:mx-0 mb-4 text-shadow-sm">
+                            <p className="text-base sm:text-lg opacity-90 max-w-md mx-auto mb-5 text-shadow-sm">
                                 Join our community of photographers sharing their best moments
                             </p>
                             
-                            {authStatus ? (
-                                <Link 
-                                    to="/add-post" 
-                                    className="inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
-                                >
-                                    <FiCamera className="mr-2" />
-                                    Share Your Moment
-                                </Link>
-                            ) : (
-                                <Link 
-                                    to="/signup" 
-                                    className="inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
-                                >
-                                    <FiUsers className="mr-2" />
-                                    Join Community
-                                </Link>
-                            )}
-                        </div>
-                        
-                        {/* Feature Icons */}
-                        <div className="md:w-1/3 grid grid-cols-3 gap-2 backdrop-blur-sm bg-black/10 p-3 rounded-xl border border-white/20 shadow-lg">
-                            <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
-                                    <FiImage className="h-5 w-5" />
-                                </div>
-                                <p className="mt-1 text-xs font-medium text-shadow-sm">Beautiful Galleries</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
-                                    <FiUsers className="h-5 w-5" />
-                                </div>
-                                <p className="mt-1 text-xs font-medium text-shadow-sm">Connect</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-white/30 mx-auto shadow-md border border-white/40">
-                                    <FiTrendingUp className="h-5 w-5" />
-                                </div>
-                                <p className="mt-1 text-xs font-medium text-shadow-sm">Discover</p>
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                {authStatus ? (
+                                    <>
+                                        <Link 
+                                            to="/add-post" 
+                                            className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
+                                        >
+                                            <FiCamera className="mr-2" />
+                                            Share Your Moment
+                                        </Link>
+                                        <Link 
+                                            to="/all-posts" 
+                                            className="inline-flex items-center px-5 py-2.5 border border-white/30 text-sm font-medium rounded-lg shadow-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50 transition-all transform hover:scale-105"
+                                        >
+                                            <FiImage className="mr-2" />
+                                            Your Posts
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <Link 
+                                        to="/signup" 
+                                        className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-lg text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-105"
+                                    >
+                                        <FiUsers className="mr-2" />
+                                        Join Community
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
