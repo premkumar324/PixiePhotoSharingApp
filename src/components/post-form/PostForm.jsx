@@ -5,6 +5,7 @@ import appwriteService from "../../appwrite/config";
 import authService from "../../appwrite/auth";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { ID } from "appwrite";
 
 export default function PostForm({ post }) {
     const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -116,7 +117,16 @@ export default function PostForm({ post }) {
             const userToUse = userData && userData.$id ? userData : currentUser;
             console.log("PostForm - Using user:", userToUse.$id);
 
-            const slug = post?.$id || data.title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+            // For existing posts, use the existing ID
+            // For new posts, use a unique ID from Appwrite
+            let slug;
+            if (post && post.$id) {
+                slug = post.$id;
+            } else {
+                // Use Appwrite's ID.unique() which generates a valid ID
+                slug = ID.unique();
+                console.log("PostForm - Generated unique ID as slug:", slug);
+            }
 
             let file = null;
             if (croppedBlob) {
