@@ -3,7 +3,7 @@ import {Container, Logo, LogoutBtn} from '../index'
 import { Link } from 'react-router-dom'
 import {useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { FiUser, FiEdit, FiGrid, FiHome, FiLogIn, FiUserPlus, FiImage, FiMenu, FiX } from 'react-icons/fi'
+import { FiUser, FiEdit, FiGrid, FiLogIn, FiUserPlus, FiImage, FiMenu, FiX } from 'react-icons/fi'
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status)

@@ -4,7 +4,7 @@ import {Container} from '../components'
 import { Query } from "appwrite";
 import ExploreGrid from '../components/ExploreGrid'
 import ExploreModal from '../components/ExploreModal'
-import { FiRefreshCw, FiCamera, FiImage, FiTrendingUp, FiUsers, FiChevronDown } from 'react-icons/fi'
+import { FiRefreshCw, FiCamera, FiImage, FiUsers, FiChevronDown } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import mountainHero from '../assets/mountain-hero.png'

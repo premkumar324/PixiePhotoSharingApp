@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { ID } from "appwrite";
 
 export default function PostForm({ post }) {
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         defaultValues: {
             title: post?.title || "",
             caption: post?.content || "",

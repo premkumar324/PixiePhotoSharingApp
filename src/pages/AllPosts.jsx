@@ -5,13 +5,13 @@ import PostModal from '../components/PostModal'
 import appwriteService from "../appwrite/config"
 import { Query } from 'appwrite'
 import { useSelector } from 'react-redux'
-import { FiGrid, FiList } from 'react-icons/fi'
+import { FiGrid } from 'react-icons/fi'
 
 function AllPosts() {
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedPost, setSelectedPost] = useState(null)
-    const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid')
     const userData = useSelector((state) => state.auth.userData)
     const authStatus = useSelector((state) => state.auth.status)
     
