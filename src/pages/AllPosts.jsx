@@ -5,19 +5,12 @@ import PostModal from '../components/PostModal'
 import appwriteService from "../appwrite/config"
 import { Query } from 'appwrite'
 import { useSelector } from 'react-redux'
-import { FiGrid } from 'react-icons/fi'
 
 function AllPosts() {
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedPost, setSelectedPost] = useState(null)
-    const [viewMode, setViewMode] = useState('grid')
     const userData = useSelector((state) => state.auth.userData)
-    const authStatus = useSelector((state) => state.auth.status)
-    
-    // Debug logging
-    console.log('AllPosts - Auth Status:', authStatus)
-    console.log('AllPosts - User Data:', userData)
 
     useEffect(() => {
         // Fetch posts by the current user
@@ -92,33 +85,9 @@ function AllPosts() {
         <div className="w-full py-6 sm:py-8">
             <Container>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Your Gallery</h1>
-                        <p className="text-gray-600 text-sm mt-1">{posts.length} posts</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            className={`p-2 rounded-lg transition-colors ${
-                                viewMode === 'grid' 
-                                ? 'bg-purple-100 text-purple-600' 
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            <FiGrid className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-lg transition-colors ${
-                                viewMode === 'list' 
-                                ? 'bg-purple-100 text-purple-600' 
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                        >
-                            <FiList className="w-5 h-5" />
-                        </button>
-                    </div>
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Your Gallery</h1>
+                    <p className="text-gray-600 text-sm mt-1">{posts.length} posts</p>
                 </div>
 
                 {/* Grid View */}
